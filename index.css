@@ -3,16 +3,77 @@
 @tailwind utilities;
 
 body {
-  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #030712;
+  color: #f3f4f6;
 }
 
+.glass-panel {
+  background: rgba(31, 41, 55, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(75, 85, 99, 0.4);
+}
+
+.slide-enter {
+  opacity: 0;
+  transform: translateX(20px);
+  animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.math-cell {
+  transition: all 0.3s ease;
+}
+.math-cell.active-row {
+  background-color: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+.math-cell.active-col {
+  background-color: rgba(139, 92, 246, 0.2);
+  border-color: #8b5cf6;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+}
+.math-cell.active-result {
+  background-color: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.custom-scroll::-webkit-scrollbar,
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
+.custom-scroll::-webkit-scrollbar-track,
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(31, 41, 55, 0.5);
+  border-radius: 4px;
 }
+.custom-scroll::-webkit-scrollbar-thumb,
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #374151;
-  border-radius: 20px;
+  background: rgba(75, 85, 99, 0.8);
+  border-radius: 4px;
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 1);
+}
+
+.connector-line {
+  stroke: #4b5563;
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 6 6;
+  animation: flow 1s linear infinite;
+}
+.connector-line.active {
+  stroke: #f59e0b;
 }
