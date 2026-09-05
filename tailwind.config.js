@@ -20,6 +20,7 @@ module.exports = {
         },
         brand: {
           blue: '#3b82f6',
+          cyan: '#06b6d4',
           purple: '#8b5cf6',
           green: '#10b981',
           orange: '#f59e0b',

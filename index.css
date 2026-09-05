@@ -77,3 +77,38 @@ body {
 .connector-line.active {
   stroke: #f59e0b;
 }
+
+@keyframes flow {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes dashFlow {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+.animate-flow-dash {
+  animation: dashFlow 1s linear infinite;
+}
+
+@keyframes packetMove {
+  0% {
+    left: -10%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    left: 110%;
+    opacity: 0;
+  }
+}
