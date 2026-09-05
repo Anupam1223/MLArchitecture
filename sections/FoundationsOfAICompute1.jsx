@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Cpu, MousePointerClick } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MousePointerClick } from 'lucide-react';
 import {
   FlowDiagramVisualizer,
   MatrixVisualizer,
@@ -59,7 +59,7 @@ const slidesData = [
     title: 'The Training Phase',
     subtitle: 'Forging the Model via Matrix Operations',
     content: (
-      <div className="space-y-4 text-gray-300 custom-scroll h-full overflow-y-auto pr-2">
+      <div className="space-y-4 text-gray-300 pr-1">
         <p>
           Training is an iterative, computationally demanding process. The core of most deep
           learning training is a massive series of matrix operations (forward passes and backward
@@ -94,7 +94,7 @@ const slidesData = [
     title: 'The Inference Phase',
     subtitle: 'Putting the Model to Work',
     content: (
-      <div className="space-y-4 text-gray-300 custom-scroll h-full overflow-y-auto pr-2">
+      <div className="space-y-4 text-gray-300 pr-1">
         <p>
           Inference uses a fully trained model to make predictions on unseen data. The parameters
           are frozen. It consists of a single forward pass through the network.
@@ -129,7 +129,7 @@ const slidesData = [
     title: 'The Role of CPUs',
     subtitle: 'System Orchestration & Data Preprocessing',
     content: (
-      <div className="space-y-3 text-gray-300 custom-scroll h-full overflow-y-auto pr-2 text-sm leading-relaxed">
+      <div className="space-y-3 text-gray-300 pr-1 text-sm leading-relaxed">
         <p>
           While GPUs handle heavy math, the CPU is the{' '}
           <strong className="text-brand-blue">master conductor</strong> of the entire AI system. It
@@ -192,7 +192,7 @@ const slidesData = [
     title: 'GPUs Accelerating AI',
     subtitle: 'The Architecture of Throughput',
     content: (
-      <div className="space-y-3 text-gray-300 custom-scroll h-full overflow-y-auto pr-2 text-sm leading-relaxed">
+      <div className="space-y-3 text-gray-300 pr-1 text-sm leading-relaxed">
         <p>
           CPUs handle essential sequential work. The{' '}
           <strong className="text-white">heavy lifting of model training</strong> almost always
@@ -229,7 +229,7 @@ const slidesData = [
     title: 'Accelerating Neural Network Ops',
     subtitle: 'Independent Dot Products at Scale',
     content: (
-      <div className="space-y-3 text-gray-300 custom-scroll h-full overflow-y-auto pr-2 text-sm leading-relaxed">
+      <div className="space-y-3 text-gray-300 pr-1 text-sm leading-relaxed">
         <p>
           Deep learning is layers of artificial neurons. Almost all of the work is the same few
           ops, repeated on huge tensors — especially <strong className="text-white">matrix
@@ -272,7 +272,7 @@ const slidesData = [
     title: 'Hardware Features',
     subtitle: 'Specialized Silicon for Deep Learning',
     content: (
-      <div className="space-y-4 text-gray-300 custom-scroll h-full overflow-y-auto pr-2">
+      <div className="space-y-4 text-gray-300 pr-1">
         <p>
           Not all GPUs are created equal. When selecting accelerators for AI, three hardware
           knobs matter most.
@@ -303,7 +303,7 @@ const slidesData = [
     title: 'The Software Layer',
     subtitle: 'CUDA and cuDNN Abstraction',
     content: (
-      <div className="space-y-4 text-gray-300 custom-scroll h-full overflow-y-auto pr-2">
+      <div className="space-y-4 text-gray-300 pr-1">
         <p>
           The raw parallel power of a GPU would be inaccessible without a robust software stack to
           translate high-level math into silicon instructions.
@@ -368,68 +368,14 @@ export default function FoundationsOfAICompute() {
       className="flex-1 flex flex-col h-full min-h-0 bg-gray-950 font-sans text-gray-100 overflow-hidden"
       style={{ backgroundImage: GRID_BG }}
     >
-      <header className="w-full px-4 py-3 flex flex-wrap items-center justify-between gap-3 glass-panel z-20 shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="bg-brand-blue p-2 rounded-lg shrink-0">
-            <Cpu className="w-5 h-5 text-white" />
-          </div>
-          <h1 className="text-base md:text-lg font-bold tracking-tight text-white truncate">
-            AI Compute Infrastructure
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="flex gap-1.5 md:gap-2">
-            {slidesData.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setCurrentSlide(idx)}
-                className={`h-2.5 rounded-full transition-all duration-300 ${
-                  idx === currentSlide
-                    ? 'w-8 md:w-10 bg-brand-blue shadow-[0_0_8px_#3b82f6]'
-                    : 'w-2.5 bg-gray-700 hover:bg-gray-500'
-                }`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={prevSlide}
-              disabled={currentSlide === 0}
-              className="px-3 py-1.5 flex items-center gap-1.5 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm font-semibold"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Prev</span>
-            </button>
-            <button
-              type="button"
-              onClick={nextSlide}
-              disabled={currentSlide === slidesData.length - 1}
-              className="px-3 py-1.5 flex items-center gap-1.5 rounded-lg bg-brand-blue text-white hover:bg-blue-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 text-sm font-semibold"
-            >
-              <span className="hidden sm:inline">Next</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <span className="text-xs font-mono text-gray-500 bg-gray-900 px-3 py-1 rounded-full border border-gray-800 shrink-0">
-            Part 1
-          </span>
-        </div>
-      </header>
-
-      <main className="flex-1 flex flex-col lg:flex-row relative z-10 w-full max-w-[1600px] mx-auto p-3 md:p-4 gap-4 min-h-0 overflow-hidden">
+      <main className="flex-1 flex flex-col lg:flex-row relative z-10 w-full mx-auto p-3 md:p-4 gap-4 min-h-0 overflow-hidden">
         <div
           key={`text-${currentSlide}`}
-          className="slide-enter w-full lg:w-[380px] xl:w-[420px] shrink-0 min-h-0 max-h-[42vh] lg:max-h-none lg:h-full glass-panel rounded-2xl p-5 flex flex-col relative overflow-hidden"
+          className="slide-enter w-full lg:w-[380px] xl:w-[420px] shrink-0 min-h-0 h-[38%] lg:h-full glass-panel rounded-2xl p-5 flex flex-col relative overflow-hidden"
         >
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-blue to-brand-purple" />
 
-          <div className="mb-4 shrink-0 pr-2">
+          <div className="mb-3 shrink-0 pr-2">
             <span className="text-brand-blue font-bold tracking-wider text-xs uppercase mb-1 block">
               Slide {currentSlide + 1} of {slidesData.length}
             </span>
@@ -439,27 +385,8 @@ export default function FoundationsOfAICompute() {
             <h3 className="text-sm text-gray-400 font-medium">{slide.subtitle}</h3>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scroll relative min-h-0 pr-1">
+          <div className="flex-1 overflow-y-scroll custom-scroll relative min-h-0 pr-1">
             {slide.content}
-          </div>
-
-          <div className="pt-4 mt-3 border-t border-gray-700 flex justify-between shrink-0 gap-2">
-            <button
-              type="button"
-              onClick={prevSlide}
-              disabled={currentSlide === 0}
-              className="px-4 py-2.5 flex-1 flex items-center justify-center gap-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm font-semibold"
-            >
-              <ArrowLeft className="w-4 h-4" /> Prev Slide
-            </button>
-            <button
-              type="button"
-              onClick={nextSlide}
-              disabled={currentSlide === slidesData.length - 1}
-              className="px-4 py-2.5 flex-1 flex items-center justify-center gap-2 rounded-lg bg-brand-blue text-white hover:bg-blue-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 text-sm font-semibold"
-            >
-              Next Slide <ArrowRight className="w-4 h-4" />
-            </button>
           </div>
         </div>
 
@@ -476,6 +403,43 @@ export default function FoundationsOfAICompute() {
           </div>
         </div>
       </main>
+
+      <footer className="flex justify-between items-center px-4 py-3 border-t border-gray-800 bg-[#161616] z-20 shrink-0">
+        <button
+          type="button"
+          onClick={prevSlide}
+          disabled={currentSlide === 0}
+          className="p-3 rounded-full bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+
+        <div className="flex items-center gap-2">
+          {slidesData.map((s, i) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setCurrentSlide(i)}
+              title={s.title}
+              aria-label={`Go to ${s.title}`}
+              className={`h-2.5 rounded-full transition-all duration-300 ${
+                i === currentSlide ? 'w-8 bg-blue-500' : 'w-2.5 bg-gray-700 hover:bg-gray-500'
+              }`}
+            />
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={nextSlide}
+          disabled={currentSlide === slidesData.length - 1}
+          className="p-3 rounded-full bg-blue-600 text-white hover:bg-blue-500 shadow transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
+      </footer>
     </div>
   );
 }
