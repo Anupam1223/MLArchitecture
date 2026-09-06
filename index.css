@@ -96,6 +96,10 @@ body {
   animation: dashFlow 1s linear infinite;
 }
 
+.animate-flow-dash-slow {
+  animation: dashFlow 2.4s linear infinite;
+}
+
 @keyframes packetMove {
   0% {
     left: -10%;
