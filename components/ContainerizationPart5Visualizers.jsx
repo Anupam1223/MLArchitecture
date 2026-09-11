@@ -625,6 +625,7 @@ export function ServiceLabVisualizer() {
   const [tab, setTab] = useState('diagram');
   const [focus, setFocus] = useState('type');
   const [hit, setHit] = useState(0);
+  const [pathStep, setPathStep] = useState(0);
   const f = SVC_FOCUS.find((x) => x.id === focus);
 
   return (
@@ -644,99 +645,207 @@ export function ServiceLabVisualizer() {
         accent="bg-teal-600"
       />
 
-      <div className="max-w-xl mx-auto w-full">
+      <div className="max-w-2xl mx-auto w-full">
         {tab === 'diagram' && (
           <div className="space-y-3">
-            <svg viewBox="0 0 420 280" className="w-full h-[260px]">
-              <rect x="20" y="70" width="380" height="195" rx="12" fill="#1e293b" stroke="#64748b" strokeDasharray="6 4" />
-              <text x="210" y="255" textAnchor="middle" fill="#94a3b8" fontSize="11">
-                Kubernetes Cluster
-              </text>
+            <div className="rounded-2xl bg-white p-3 shadow-inner">
+              <svg viewBox="0 0 640 460" className="w-full h-[340px]">
+                <defs>
+                  <marker id="arrBlk" markerWidth="10" markerHeight="10" refX="8" refY="3.5" orient="auto">
+                    <path d="M0,0 L8,3.5 L0,7 Z" fill="#111827" />
+                  </marker>
+                  <marker id="arrDash" markerWidth="10" markerHeight="10" refX="8" refY="3.5" orient="auto">
+                    <path d="M0,0 L8,3.5 L0,7 Z" fill="#4b5563" />
+                  </marker>
+                </defs>
 
-              <circle cx="330" cy="28" r="26" fill="#f8fafc" stroke="#334155" strokeWidth="2" />
-              <text x="330" y="32" textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="700">
-                Client
-              </text>
-              <path d="M310 48 Q 280 70 248 108" fill="none" stroke="#e2e8f0" strokeWidth="2" markerEnd="url(#arr5)" />
-              <text x="300" y="88" fill="#cbd5e1" fontSize="9">
-                NodeIP:NodePort
-              </text>
+                {/* Client — outside the cluster */}
+                <circle
+                  cx="500"
+                  cy="48"
+                  r="36"
+                  fill={pathStep >= 1 ? '#fef3c7' : '#ffffff'}
+                  stroke="#111827"
+                  strokeWidth="2.5"
+                />
+                <text x="500" y="53" textAnchor="middle" fill="#111827" fontSize="14" fontWeight="700">
+                  Client
+                </text>
 
-              <rect x="36" y="100" width="150" height="44" rx="6" fill="#7dd3fc" />
-              <text x="111" y="126" textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="700">
-                Deployment: iris-deployment
-              </text>
+                <path
+                  d="M500 84 L500 118 L430 155"
+                  fill="none"
+                  stroke={pathStep >= 1 ? '#d97706' : '#111827'}
+                  strokeWidth={pathStep >= 1 ? 3 : 2}
+                  markerEnd="url(#arrBlk)"
+                />
+                <text x="512" y="118" fill="#111827" fontSize="12">
+                  sends request via
+                </text>
+                <text x="512" y="134" fill="#111827" fontSize="12" fontWeight="700">
+                  NodeIP:NodePort
+                </text>
 
-              <polygon points="210,92 300,118 210,144 120,118" fill="#5eead4" stroke="#0f766e" />
-              <text x="210" y="114" textAnchor="middle" fill="#134e4a" fontSize="10" fontWeight="700">
-                Service: iris-service
-              </text>
-              <text x="210" y="128" textAnchor="middle" fill="#134e4a" fontSize="9">
-                (NodePort)
-              </text>
+                {/* Cluster */}
+                <rect x="24" y="148" width="592" height="292" rx="4" fill="#e8eef2" />
 
-              <rect
-                x="70"
-                y="190"
-                width="90"
-                height="40"
-                rx="4"
-                fill={hit === 0 ? '#fde047' : '#facc15'}
-                stroke="#a16207"
-              />
-              <text x="115" y="208" textAnchor="middle" fill="#422006" fontSize="10" fontWeight="700">
-                Pod
-              </text>
-              <text x="115" y="222" textAnchor="middle" fill="#422006" fontSize="9">
-                iris-app:v1
-              </text>
+                {/* Deployment */}
+                <g>
+                  <rect x="36" y="178" width="24" height="58" rx="3" fill="#7ec8f5" stroke="#1e3a5f" strokeWidth="1.5" />
+                  <rect x="48" y="172" width="210" height="70" rx="4" fill="#7ec8f5" stroke="#1e3a5f" strokeWidth="2" />
+                  <text x="153" y="213" textAnchor="middle" fill="#0f172a" fontSize="14" fontWeight="700">
+                    Deployment: iris-deployment
+                  </text>
+                </g>
 
-              <rect
-                x="200"
-                y="190"
-                width="90"
-                height="40"
-                rx="4"
-                fill={hit === 1 ? '#fde047' : '#facc15'}
-                stroke="#a16207"
-              />
-              <text x="245" y="208" textAnchor="middle" fill="#422006" fontSize="10" fontWeight="700">
-                Pod
-              </text>
-              <text x="245" y="222" textAnchor="middle" fill="#422006" fontSize="9">
-                iris-app:v1
-              </text>
+                {/* Service diamond — clearly to the right, no overlap */}
+                <polygon
+                  points="430,168 552,214 430,260 308,214"
+                  fill={pathStep >= 1 ? '#5eead4' : '#7ee0d0'}
+                  stroke="#115e59"
+                  strokeWidth="2"
+                />
+                <text x="430" y="208" textAnchor="middle" fill="#134e4a" fontSize="14" fontWeight="700">
+                  Service: iris-service
+                </text>
+                <text x="430" y="228" textAnchor="middle" fill="#134e4a" fontSize="12">
+                  (Type: NodePort)
+                </text>
 
-              <path d="M111 144 Q 111 170 115 190" fill="none" stroke="#94a3b8" strokeDasharray="5 4" markerEnd="url(#arr5)" />
-              <text x="70" y="172" fill="#94a3b8" fontSize="9">
-                manages
-              </text>
-              <path d="M111 144 Q 160 170 200 190" fill="none" stroke="#94a3b8" strokeDasharray="5 4" markerEnd="url(#arr5)" />
+                {/* Pods */}
+                <rect
+                  x="168"
+                  y="338"
+                  width="130"
+                  height="56"
+                  rx="3"
+                  fill={pathStep === 2 && hit === 0 ? '#facc15' : '#fde68a'}
+                  stroke="#a16207"
+                  strokeWidth={pathStep === 2 && hit === 0 ? 3 : 2}
+                />
+                <text x="233" y="360" textAnchor="middle" fill="#422006" fontSize="14" fontWeight="700">
+                  Pod
+                </text>
+                <text x="233" y="378" textAnchor="middle" fill="#422006" fontSize="12">
+                  iris-app:v1
+                </text>
 
-              <path d="M200 144 Q 160 170 115 190" fill="none" stroke="#2dd4bf" strokeWidth="2" markerEnd="url(#arr5t)" />
-              <path d="M220 144 Q 232 170 245 190" fill="none" stroke="#2dd4bf" strokeWidth="2" markerEnd="url(#arr5t)" />
-              <text x="250" y="168" fill="#5eead4" fontSize="9">
-                forwards to
-              </text>
+                <rect
+                  x="338"
+                  y="338"
+                  width="130"
+                  height="56"
+                  rx="3"
+                  fill={pathStep === 2 && hit === 1 ? '#facc15' : '#fde68a'}
+                  stroke="#a16207"
+                  strokeWidth={pathStep === 2 && hit === 1 ? 3 : 2}
+                />
+                <text x="403" y="360" textAnchor="middle" fill="#422006" fontSize="14" fontWeight="700">
+                  Pod
+                </text>
+                <text x="403" y="378" textAnchor="middle" fill="#422006" fontSize="12">
+                  iris-app:v1
+                </text>
 
-              <defs>
-                <marker id="arr5" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-                  <path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8" />
-                </marker>
-                <marker id="arr5t" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-                  <path d="M0,0 L6,3 L0,6 Z" fill="#2dd4bf" />
-                </marker>
-              </defs>
-            </svg>
-            <button
-              type="button"
-              onClick={() => setHit((h) => (h === 0 ? 1 : 0))}
-              className="w-full py-2 rounded-xl bg-teal-600 text-white text-xs font-bold"
-            >
-              Send request — Service picks Pod {hit + 1}
-            </button>
+                {/* Deployment manages — dashed, from bottom of deployment */}
+                <path
+                  d="M120 242 C 120 290, 200 310, 233 338"
+                  fill="none"
+                  stroke="#4b5563"
+                  strokeWidth="2"
+                  strokeDasharray="7 5"
+                  markerEnd="url(#arrDash)"
+                />
+                <path
+                  d="M200 242 C 260 290, 360 310, 403 338"
+                  fill="none"
+                  stroke="#4b5563"
+                  strokeWidth="2"
+                  strokeDasharray="7 5"
+                  markerEnd="url(#arrDash)"
+                />
+                <text x="108" y="300" fill="#374151" fontSize="13" fontStyle="italic">
+                  manages
+                </text>
+
+                {/* Service forwards — solid */}
+                <path
+                  d="M390 252 C 320 290, 260 310, 233 338"
+                  fill="none"
+                  stroke={pathStep === 2 && hit === 0 ? '#d97706' : '#111827'}
+                  strokeWidth={pathStep === 2 && hit === 0 ? 3 : 2}
+                  markerEnd="url(#arrBlk)"
+                />
+                <path
+                  d="M450 252 C 440 290, 420 310, 403 338"
+                  fill="none"
+                  stroke={pathStep === 2 && hit === 1 ? '#d97706' : '#111827'}
+                  strokeWidth={pathStep === 2 && hit === 1 ? 3 : 2}
+                  markerEnd="url(#arrBlk)"
+                />
+                <text x="430" y="300" fill="#111827" fontSize="13" fontStyle="italic">
+                  forwards to
+                </text>
+
+                <text x="318" y="412" textAnchor="middle" fill="#334155" fontSize="13">
+                  Pods
+                </text>
+                <text x="318" y="430" textAnchor="middle" fill="#334155" fontSize="13">
+                  Kubernetes Cluster
+                </text>
+              </svg>
+            </div>
+
+            <div className="rounded-xl border border-teal-400/40 bg-teal-500/10 px-4 py-3 text-sm text-gray-200 leading-relaxed min-h-[4.2rem]">
+              {pathStep === 0 && (
+                <>
+                  <strong className="text-white">Bigger picture:</strong> two jobs, two objects. The{' '}
+                  <span className="text-sky-300">Deployment</span> (dashed) owns the Pods — how many,
+                  which image. The <span className="text-teal-300">Service</span> (solid) is the stable
+                  address. Clients never talk to a Pod IP.
+                </>
+              )}
+              {pathStep === 1 && (
+                <>
+                  <strong className="text-white">1. Client → Service.</strong> You call{' '}
+                  <span className="font-mono text-rose-300 text-xs">NodeIP:NodePort</span> (e.g.
+                  192.168.49.2:31234). That hits iris-service, not a Pod.
+                </>
+              )}
+              {pathStep === 2 && (
+                <>
+                  <strong className="text-white">2. Service → Pod {hit + 1}.</strong> Matching label{' '}
+                  <span className="font-mono text-rose-300 text-xs">app: iris-server</span>, traffic
+                  lands on a replica. If that Pod dies, the Deployment replaces it; the Service URL
+                  stays the same.
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-center gap-2">
+              <button
+                type="button"
+                disabled={pathStep === 0}
+                onClick={() => setPathStep((s) => Math.max(0, s - 1))}
+                className="px-3 py-1.5 rounded-lg bg-gray-800 text-xs text-gray-300 disabled:opacity-30"
+              >
+                ← Back
+              </button>
+              <button
+                type="button"
+                disabled={pathStep >= 2}
+                onClick={() => {
+                  if (pathStep === 1) setHit((h) => (h === 0 ? 1 : 0));
+                  setPathStep((s) => Math.min(2, s + 1));
+                }}
+                className="px-4 py-1.5 rounded-lg bg-teal-600 text-xs font-bold text-white disabled:opacity-30"
+              >
+                {pathStep === 0 ? 'Follow a request →' : 'Forward to a Pod →'}
+              </button>
+            </div>
             <p className="text-[10px] text-center text-gray-500 italic">
-              Client hits the stable Service. Deployment owns replica count; Service load-balances to those Pods.
+              A user sends a request to the stable Service, which forwards to one of the Pods the
+              Deployment manages.
             </p>
           </div>
         )}
@@ -956,6 +1065,539 @@ kubectl delete -f deployment.yaml`}</pre>
             </div>
           </>
         )}
+      </div>
+    </div>
+  );
+}
+
+/* ── 10. Blueprint: deployment.yaml ↔ architecture ────────────────────────── */
+
+function HoverLine({ id, focus, setFocus, children }) {
+  const active = focus === id;
+  return (
+    <button
+      type="button"
+      onMouseEnter={() => setFocus(id)}
+      onFocus={() => setFocus(id)}
+      onClick={() => setFocus(id)}
+      className={`block w-full text-left whitespace-pre rounded-md px-1.5 py-0.5 transition ${
+        active ? 'bg-amber-500/25 ring-1 ring-amber-400/60' : 'hover:bg-white/5'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function BlueprintDeploymentVisualizer() {
+  const [focus, setFocus] = useState('replicas');
+
+  const note = {
+    kind: 'kind: Deployment asks the control plane for a controller object — the thing that will own Pods.',
+    replicas: 'replicas: 2 sets the controller’s desired state. It will create and keep exactly two Pods.',
+    selector: 'selector is how the controller claims Pods: anything labeled app=iris-server belongs to it.',
+    labels: 'template.metadata.labels stamps that same label onto every Pod it creates — this is what makes the selector match.',
+    image: 'template.spec.containers puts your Docker image inside each Pod. Change this line to ship a new model version.',
+    port: 'containerPort 5000 declares where Flask listens inside the Pod — the Service will target this.',
+  }[focus];
+
+  return (
+    <div className="flex flex-col w-full h-full p-4 overflow-y-auto custom-scroll">
+      <div className="text-center mb-3">
+        <h3 className="text-xl font-semibold text-white mb-1">Blueprint → Architecture: the Deployment</h3>
+        <p className="text-gray-400 text-sm">
+          Hover the YAML — see exactly which piece of the cluster that line creates.
+        </p>
+      </div>
+
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 min-h-0">
+        <div className="rounded-2xl bg-black/80 border border-gray-700 p-3 font-mono text-[12px] leading-6 text-gray-300 overflow-x-auto whitespace-pre">
+          <div className="text-gray-500 border-b border-gray-800 pb-1 mb-2">deployment.yaml</div>
+          <div>apiVersion: apps/v1</div>
+          <HoverLine id="kind" focus={focus} setFocus={setFocus}>
+            kind: <span className="text-emerald-300">Deployment</span>
+          </HoverLine>
+          <div>metadata:</div>
+          <div>  name: iris-deployment</div>
+          <div>spec:</div>
+          <HoverLine id="replicas" focus={focus} setFocus={setFocus}>
+            {'  '}replicas: <span className="text-sky-300">2</span>{' '}
+            <span className="text-gray-500 italic"># desired state</span>
+          </HoverLine>
+          <HoverLine id="selector" focus={focus} setFocus={setFocus}>
+            {'  '}selector:
+            {'\n'}
+            {'    '}matchLabels:
+            {'\n'}
+            {'      '}app: <span className="text-rose-300">iris-server</span>
+          </HoverLine>
+          <div>  template:</div>
+          <HoverLine id="labels" focus={focus} setFocus={setFocus}>
+            {'    '}metadata:
+            {'\n'}
+            {'      '}labels:
+            {'\n'}
+            {'        '}app: <span className="text-rose-300">iris-server</span>
+          </HoverLine>
+          <div>    spec:</div>
+          <div>      containers:</div>
+          <HoverLine id="image" focus={focus} setFocus={setFocus}>
+            {'      '}- name: iris-app-container
+            {'\n'}
+            {'        '}image: <span className="text-amber-300">iris-app:v1</span>
+          </HoverLine>
+          <HoverLine id="port" focus={focus} setFocus={setFocus}>
+            {'        '}ports:
+            {'\n'}
+            {'        '}- containerPort: <span className="text-sky-300">5000</span>
+          </HoverLine>
+        </div>
+
+        <div className="rounded-2xl border border-gray-700 bg-gray-950/70 p-3 flex flex-col">
+          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">
+            Kubernetes cluster
+          </div>
+
+          <div
+            className={`rounded-xl border-2 p-3 text-center mb-4 transition ${
+              focus === 'kind' || focus === 'replicas' || focus === 'selector'
+                ? 'border-violet-400 bg-violet-500/20'
+                : 'border-gray-700 bg-gray-900/60'
+            }`}
+          >
+            <div className="text-sm font-bold text-violet-200">Deployment controller</div>
+            <div
+              className={`mt-1 inline-block rounded px-2 py-0.5 text-[11px] font-bold ${
+                focus === 'replicas' ? 'bg-sky-500 text-white' : 'text-gray-400'
+              }`}
+            >
+              desired state: 2 replicas
+            </div>
+            <div
+              className={`mt-1 text-[11px] font-mono ${
+                focus === 'selector' ? 'text-rose-300 font-bold' : 'text-gray-500'
+              }`}
+            >
+              selector: app=iris-server
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2].map((n) => (
+              <div
+                key={n}
+                className={`rounded-xl border-2 p-3 text-center transition ${
+                  focus === 'replicas'
+                    ? 'border-sky-400 bg-sky-500/15'
+                    : 'border-emerald-400/50 bg-emerald-500/5'
+                }`}
+              >
+                <div className="text-xs font-bold text-emerald-200 mb-1">Pod {n}</div>
+                <div
+                  className={`inline-block rounded px-1.5 py-0.5 text-[9px] font-mono mb-2 ${
+                    focus === 'labels' || focus === 'selector'
+                      ? 'bg-rose-500 text-white font-bold'
+                      : 'bg-gray-800 text-gray-400'
+                  }`}
+                >
+                  app: iris-server
+                </div>
+                <div
+                  className={`rounded-lg border px-2 py-2 text-[10px] font-mono transition ${
+                    focus === 'image'
+                      ? 'border-amber-400 bg-amber-500/20 text-amber-100'
+                      : 'border-gray-700 bg-gray-900 text-gray-400'
+                  }`}
+                >
+                  iris-app:v1
+                  <div
+                    className={`text-[9px] mt-0.5 ${
+                      focus === 'port' ? 'text-sky-300 font-bold' : 'text-gray-600'
+                    }`}
+                  >
+                    :5000
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-auto pt-3">
+            <div className="rounded-lg border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-xs text-gray-200 leading-relaxed">
+              {note}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── 11. Blueprint: service.yaml ↔ networking ─────────────────────────────── */
+
+export function BlueprintServiceVisualizer() {
+  const [focus, setFocus] = useState('type');
+  const [request, setRequest] = useState(-1); // -1 idle, 0..3 hops
+  const [target, setTarget] = useState(0);
+
+  const fire = () => {
+    setTarget((t) => (t === 0 ? 1 : 0));
+    setRequest(0);
+    [1, 2, 3].forEach((n) => setTimeout(() => setRequest(n), n * 650));
+    setTimeout(() => setRequest(-1), 3200);
+  };
+
+  const note = {
+    type: 'type: NodePort opens a high port (31234) on the node itself, so traffic from outside the cluster can get in.',
+    selector: 'selector app=iris-server is the link to the Deployment’s Pods — no IPs are hard-coded anywhere.',
+    ports: 'port 80 is the Service address; targetPort 5000 is where Flask actually listens inside the Pod.',
+  }[focus];
+
+  return (
+    <div className="flex flex-col w-full h-full p-4 overflow-y-auto custom-scroll">
+      <div className="text-center mb-3">
+        <h3 className="text-xl font-semibold text-white mb-1">Blueprint → Architecture: the Service</h3>
+        <p className="text-gray-400 text-sm">
+          Hover the YAML, then send a request and watch it hop into a Pod.
+        </p>
+      </div>
+
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 min-h-0">
+        <div className="rounded-2xl bg-black/80 border border-gray-700 p-3 font-mono text-[12px] leading-6 text-gray-300 overflow-x-auto whitespace-pre">
+          <div className="text-gray-500 border-b border-gray-800 pb-1 mb-2">service.yaml</div>
+          <div>apiVersion: v1</div>
+          <div>kind: <span className="text-emerald-300">Service</span></div>
+          <div>metadata:</div>
+          <div>  name: iris-service</div>
+          <div>spec:</div>
+          <HoverLine id="type" focus={focus} setFocus={setFocus}>
+            {'  '}type: <span className="text-rose-300">NodePort</span>{' '}
+            <span className="text-gray-500 italic"># opens a port on the node</span>
+          </HoverLine>
+          <HoverLine id="selector" focus={focus} setFocus={setFocus}>
+            {'  '}selector:
+            {'\n'}
+            {'    '}app: <span className="text-rose-300">iris-server</span>
+          </HoverLine>
+          <HoverLine id="ports" focus={focus} setFocus={setFocus}>
+            {'  '}ports:
+            {'\n'}
+            {'  '}- protocol: TCP
+            {'\n'}
+            {'    '}port: <span className="text-sky-300">80</span>
+            {'\n'}
+            {'    '}targetPort: <span className="text-sky-300">5000</span>
+          </HoverLine>
+
+          <div className="mt-3 rounded-lg border border-teal-400/40 bg-teal-500/10 px-2 py-2 font-sans text-xs text-gray-200 leading-relaxed whitespace-normal">
+            {note}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-gray-700 bg-gray-950/70 p-3 flex flex-col">
+          <div
+            className={`mx-auto rounded-full border-2 px-4 py-2 text-xs font-bold transition ${
+              request === 0 ? 'border-amber-400 bg-amber-500/25 text-amber-100' : 'border-gray-600 text-gray-300'
+            }`}
+          >
+            External client · curl
+          </div>
+
+          <div className="flex justify-center py-1">
+            <div className={`text-lg ${request >= 1 ? 'text-amber-400' : 'text-gray-700'}`}>↓</div>
+          </div>
+
+          <div
+            className={`mx-auto rounded-lg border-2 px-3 py-1.5 text-xs font-mono font-bold transition ${
+              focus === 'type' || request === 1
+                ? 'border-rose-400 bg-rose-500/25 text-rose-100'
+                : 'border-gray-700 text-gray-400'
+            }`}
+          >
+            NodeIP:31234 (NodePort)
+          </div>
+
+          <div className="mt-2 rounded-xl border-2 border-dashed border-gray-600 p-3 flex-1 flex flex-col">
+            <div className="text-[10px] font-bold text-gray-500 uppercase mb-2">Kubernetes cluster</div>
+
+            <div
+              className={`mx-auto rounded-lg border-2 px-4 py-2 text-center transition ${
+                request === 2 ? 'border-teal-300 bg-teal-500/30' : 'border-teal-400/50 bg-teal-500/10'
+              }`}
+            >
+              <div className="text-xs font-bold text-teal-100">Service: iris-service</div>
+              <div
+                className={`text-[10px] font-mono ${
+                  focus === 'ports' ? 'text-sky-300 font-bold' : 'text-teal-200/70'
+                }`}
+              >
+                port 80 → targetPort 5000
+              </div>
+              <div
+                className={`text-[9px] font-mono mt-0.5 ${
+                  focus === 'selector' ? 'text-rose-300 font-bold' : 'text-gray-500'
+                }`}
+              >
+                selector: app=iris-server
+              </div>
+            </div>
+
+            <div className="flex justify-center py-1">
+              <div className={`text-lg ${request >= 3 ? 'text-teal-300' : 'text-gray-700'}`}>↓</div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {[0, 1].map((i) => (
+                <div
+                  key={i}
+                  className={`rounded-xl border-2 p-3 text-center transition ${
+                    request === 3 && target === i
+                      ? 'border-amber-400 bg-amber-500/25 scale-105'
+                      : 'border-emerald-400/50 bg-emerald-500/5'
+                  }`}
+                >
+                  <div className="text-xs font-bold text-emerald-200">Pod {i + 1}</div>
+                  <div
+                    className={`text-[9px] font-mono mt-1 ${
+                      focus === 'selector' ? 'text-rose-300 font-bold' : 'text-gray-500'
+                    }`}
+                  >
+                    app: iris-server
+                  </div>
+                  <div className="text-[9px] font-mono text-gray-500">Flask :5000</div>
+                  {request === 3 && target === i && (
+                    <div className="mt-1 text-[9px] font-bold text-amber-200">handling request</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={fire}
+            className="mt-3 w-full py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition"
+          >
+            Simulate external request
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── 12. Ground → production build ────────────────────────────────────────── */
+
+const BUILD_STAGES = [
+  {
+    id: 0,
+    cmd: null,
+    out: null,
+    title: 'Bare cluster',
+    note: 'You start with a worker node and nothing else. No image, no controller, no address.',
+  },
+  {
+    id: 1,
+    cmd: 'docker build -t iris-app:v1 .',
+    out: 'Successfully tagged iris-app:v1',
+    title: 'Artifact exists',
+    note: 'The Dockerfile turns app.py + requirements into an immutable image. Nothing is running yet — this is just a build artifact.',
+  },
+  {
+    id: 2,
+    cmd: 'kubectl apply -f deployment.yaml',
+    out: 'deployment.apps/iris-deployment created',
+    title: 'Workload exists',
+    note: 'The Deployment controller appears and reconciles: 0 Pods running, 2 desired → it schedules two Pods from your image onto the node.',
+  },
+  {
+    id: 3,
+    cmd: 'kubectl apply -f service.yaml',
+    out: 'service/iris-service created',
+    title: 'Address exists',
+    note: 'The Service claims those Pods by label and opens NodePort 31234. Now the app has a stable front door that survives Pod restarts.',
+  },
+  {
+    id: 4,
+    cmd: 'curl -X POST http://NODE_IP:31234/predict -d \'{"features":[5.1,3.5,1.4,0.2]}\'',
+    out: '{"prediction":"setosa"}',
+    title: 'Serving traffic',
+    note: 'Request enters the NodePort, the Service load-balances to one Pod, Flask answers. This is a working inference endpoint.',
+  },
+  {
+    id: 5,
+    cmd: 'kubectl scale deployment/iris-deployment --replicas=4',
+    out: 'deployment.apps/iris-deployment scaled',
+    title: 'Production shape',
+    note: 'Same declarative loop scales you out. For real production you swap NodePort for LoadBalancer/Ingress, add probes and resource limits, and roll new models by bumping the image tag.',
+  },
+];
+
+export function GroundToProductionVisualizer() {
+  const [stage, setStage] = useState(0);
+  const s = BUILD_STAGES[stage];
+
+  const pods = stage >= 2 ? (stage >= 5 ? 4 : 2) : 0;
+
+  return (
+    <div className="flex flex-col w-full h-full p-4 overflow-y-auto custom-scroll">
+      <div className="text-center mb-3">
+        <h3 className="text-xl font-semibold text-white mb-1">Ground → production, one command at a time</h3>
+        <p className="text-gray-400 text-sm">
+          Left: what you type. Right: what actually exists in the cluster after it.
+        </p>
+      </div>
+
+      <div className="flex justify-center gap-1.5 mb-3 flex-wrap">
+        {BUILD_STAGES.map((b) => (
+          <button
+            key={b.id}
+            type="button"
+            onClick={() => setStage(b.id)}
+            className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition ${
+              stage === b.id
+                ? 'bg-amber-500 text-white'
+                : stage > b.id
+                  ? 'bg-emerald-900/60 text-emerald-200 border border-emerald-500/40'
+                  : 'bg-gray-800 text-gray-500 border border-gray-700'
+            }`}
+          >
+            {b.id}. {b.title}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 min-h-0">
+        {/* terminal */}
+        <div className="rounded-2xl bg-black/85 border border-gray-700 overflow-hidden flex flex-col">
+          <div className="flex items-center gap-1.5 px-3 py-2 bg-gray-800/80 border-b border-gray-700">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+            <span className="ml-2 text-[10px] font-mono text-gray-400">kubectl terminal</span>
+          </div>
+          <div className="p-3 font-mono text-[11px] leading-5 space-y-1.5 overflow-x-auto">
+            {BUILD_STAGES.slice(1, stage + 1).map((b) => (
+              <div key={b.id}>
+                <div className="text-gray-200 break-all">
+                  <span className="text-emerald-400">$ </span>
+                  {b.cmd}
+                </div>
+                <div className={b.id === 4 ? 'text-amber-300 font-bold' : 'text-gray-500'}>{b.out}</div>
+              </div>
+            ))}
+            {stage < 5 && (
+              <div className="text-gray-500">
+                <span className="text-emerald-400">$ </span>
+                <span className="bg-gray-700/60 px-1.5 rounded text-gray-200">
+                  {BUILD_STAGES[stage + 1].cmd.length > 46
+                    ? `${BUILD_STAGES[stage + 1].cmd.slice(0, 46)}…`
+                    : BUILD_STAGES[stage + 1].cmd}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* live cluster */}
+        <div className="rounded-2xl border border-gray-700 bg-gray-950/70 p-3 flex flex-col">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              Live cluster state
+            </span>
+            <button
+              type="button"
+              onClick={() => setStage(0)}
+              className="text-[10px] px-2 py-1 rounded-lg bg-gray-800 text-gray-300 hover:text-white"
+            >
+              Reset
+            </button>
+          </div>
+
+          <div className="flex-1 flex flex-col justify-end gap-2">
+            {stage >= 1 && (
+              <div
+                className={`self-center rounded-lg border px-3 py-1.5 text-[10px] font-mono transition ${
+                  stage === 1 ? 'border-amber-400 bg-amber-500/20 text-amber-100' : 'border-gray-700 text-gray-500'
+                }`}
+              >
+                image: iris-app:v1 {stage === 1 && '(built, not running)'}
+              </div>
+            )}
+
+            {stage >= 4 && (
+              <div
+                className={`self-center rounded-lg border-2 px-3 py-1 text-[10px] font-mono font-bold ${
+                  stage === 4 ? 'border-amber-400 bg-amber-500/25 text-amber-100' : 'border-gray-700 text-gray-500'
+                }`}
+              >
+                client → NodeIP:31234
+              </div>
+            )}
+
+            {stage >= 3 && (
+              <div className="self-center rounded-xl border-2 border-sky-400 bg-sky-500/15 px-4 py-2 text-center shadow-lg shadow-sky-500/10">
+                <div className="text-xs font-bold text-sky-100">iris-service</div>
+                <div className="text-[10px] font-mono text-sky-300">NodePort: 31234</div>
+              </div>
+            )}
+
+            {stage >= 2 && (
+              <div className="self-center rounded-lg border border-violet-400/50 bg-violet-500/10 px-3 py-1 text-[10px] font-bold text-violet-200">
+                Deployment controller · {pods} desired
+              </div>
+            )}
+
+            <div className="flex justify-center gap-2 flex-wrap">
+              {Array.from({ length: pods }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`rounded-xl border-2 px-3 py-2 text-center transition ${
+                    stage === 4 && i === 0
+                      ? 'border-amber-400 bg-amber-500/20'
+                      : 'border-emerald-400/60 bg-emerald-500/10'
+                  }`}
+                >
+                  <div className="text-[10px] font-bold text-white">Pod (iris-app)</div>
+                  <div className="text-[9px] text-emerald-300">Running</div>
+                </div>
+              ))}
+              {pods === 0 && (
+                <div className="text-[10px] text-gray-600 italic py-4">no workloads scheduled</div>
+              )}
+            </div>
+
+            <div className="rounded-lg border border-gray-700 bg-gray-900/70 py-2 text-center text-[10px] text-gray-400">
+              Node 1 (worker machine)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 mt-3">
+        <div className="text-amber-300 text-xs font-bold mb-1">
+          {s.id}. {s.title}
+        </div>
+        <p className="text-sm text-gray-200 leading-relaxed">{s.note}</p>
+      </div>
+
+      <div className="flex justify-center gap-2 mt-3">
+        <button
+          type="button"
+          disabled={stage === 0}
+          onClick={() => setStage((v) => Math.max(0, v - 1))}
+          className="px-3 py-1.5 rounded-lg bg-gray-800 text-xs text-gray-300 disabled:opacity-30"
+        >
+          ← Back
+        </button>
+        <button
+          type="button"
+          disabled={stage === 5}
+          onClick={() => setStage((v) => Math.min(5, v + 1))}
+          className="px-4 py-1.5 rounded-lg bg-amber-600 text-xs font-bold text-white disabled:opacity-30"
+        >
+          Run next command →
+        </button>
       </div>
     </div>
   );

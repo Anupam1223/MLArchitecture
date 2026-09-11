@@ -10,6 +10,9 @@ import {
   ServiceLabVisualizer,
   ApplyLabVisualizer,
   TestLabVisualizer,
+  BlueprintDeploymentVisualizer,
+  BlueprintServiceVisualizer,
+  GroundToProductionVisualizer,
 } from '../components/ContainerizationPart5Visualizers';
 
 export const meta = {
@@ -164,23 +167,51 @@ const slidesData = [
       <div className="space-y-3 text-gray-300 text-sm leading-relaxed pr-1">
         <p>
           A <strong className="text-white">Deployment</strong> manages identical Pods, replica count,
-          and rollouts. Create <span className="font-mono text-rose-300 text-xs">deployment.yaml</span>:
+          and rollouts. Create <span className="font-mono text-rose-300 text-xs">deployment.yaml</span>.
         </p>
-        <ul className="list-disc pl-5 space-y-2">
+        <h4 className="text-white font-semibold">Let&apos;s break down this file</h4>
+        <ul className="list-disc pl-5 space-y-2.5">
           <li>
-            <span className="font-mono text-xs">replicas: 2</span> — two running instances.
+            <span className="font-mono text-rose-300 text-xs">replicas: 2</span> — Instructs
+            Kubernetes to maintain two running instances (Pods) of our application for availability.
           </li>
           <li>
-            <span className="font-mono text-xs">selector</span> / labels{' '}
-            <span className="font-mono text-rose-300 text-xs">app: iris-server</span>
+            <span className="font-mono text-rose-300 text-xs">selector</span> — Tells the Deployment
+            which Pods to manage. It finds Pods with the label{' '}
+            <span className="font-mono text-rose-300 text-xs">app: iris-server</span>.
           </li>
           <li>
-            Image <span className="font-mono text-xs">iris-app:v1</span>,{' '}
-            <span className="font-mono text-xs">imagePullPolicy: IfNotPresent</span> (use the local
-            image), <span className="font-mono text-xs">containerPort: 5000</span>
+            <span className="font-mono text-rose-300 text-xs">template</span> — Defines the Pod that
+            will be created. It includes:
+            <ul className="list-disc pl-5 mt-2 space-y-2">
+              <li>
+                <span className="font-mono text-rose-300 text-xs">metadata.labels</span> — A label{' '}
+                <span className="font-mono text-rose-300 text-xs">app: iris-server</span> is attached
+                to each Pod. This is how the selector finds them.
+              </li>
+              <li>
+                <span className="font-mono text-rose-300 text-xs">spec.containers</span> — Defines the
+                container(s) to run inside the Pod.
+              </li>
+              <li>
+                <span className="font-mono text-rose-300 text-xs">image: iris-app:v1</span> — Specifies
+                the Docker image to use.
+              </li>
+              <li>
+                <span className="font-mono text-rose-300 text-xs">imagePullPolicy: IfNotPresent</span>{' '}
+                — Use the local image if it exists, rather than pulling from a remote registry. Useful
+                for local development.
+              </li>
+              <li>
+                <span className="font-mono text-rose-300 text-xs">containerPort: 5000</span> — Informs
+                Kubernetes that the container listens on port 5000.
+              </li>
+            </ul>
           </li>
         </ul>
-        <p className="text-xs text-gray-400 italic">Tap YAML fields — full manifest on the right.</p>
+        <p className="text-xs text-gray-400 italic">
+          Tap matching YAML fields on the right to highlight each of these in the full manifest.
+        </p>
       </div>
     ),
     Visual: DeploymentLabVisualizer,
@@ -268,6 +299,119 @@ const slidesData = [
       </div>
     ),
     Visual: TestLabVisualizer,
+  },
+  {
+    id: 'blueprint-deploy',
+    title: 'Blueprint → Architecture: deployment.yaml',
+    subtitle: 'Every line you write creates a specific thing in the cluster',
+    content: (
+      <div className="space-y-3 text-gray-300 text-sm leading-relaxed pr-1">
+        <p>
+          Knowing <em>what does what</em> is not enough to start building. What you need is the map
+          from <strong className="text-white">the text you type</strong> to{' '}
+          <strong className="text-white">the object that appears</strong>.
+        </p>
+        <p>
+          <span className="font-mono text-xs text-emerald-300">kind: Deployment</span> creates the
+          controller. <span className="font-mono text-xs text-sky-300">replicas: 2</span> is the number
+          it will defend. <span className="font-mono text-xs text-rose-300">selector</span> and{' '}
+          <span className="font-mono text-xs text-rose-300">template.labels</span> are one idea written
+          twice — the label is how the controller recognises its own Pods.
+        </p>
+        <p>
+          <span className="font-mono text-xs text-amber-300">image: iris-app:v1</span> is the only line
+          that changes when you ship a new model.{' '}
+          <span className="font-mono text-xs text-sky-300">containerPort: 5000</span> is the door the
+          Service will later knock on.
+        </p>
+        <p>
+          Nothing here mentions an IP address or a machine. You describe a shape; Kubernetes finds the
+          hardware.
+        </p>
+        <p className="text-xs text-gray-400 italic">
+          Hover a YAML line to light up the part of the cluster it builds.
+        </p>
+      </div>
+    ),
+    Visual: BlueprintDeploymentVisualizer,
+  },
+  {
+    id: 'blueprint-service',
+    title: 'Blueprint → Architecture: service.yaml',
+    subtitle: 'How the outside world reaches those Pods',
+    content: (
+      <div className="space-y-3 text-gray-300 text-sm leading-relaxed pr-1">
+        <p>
+          Pods now exist but are unreachable. The Service is the second half of the architecture: a
+          stable address plus a load balancer.
+        </p>
+        <p>
+          <span className="font-mono text-xs text-rose-300">type: NodePort</span> punches a high port
+          (31234) through the cluster boundary.{' '}
+          <span className="font-mono text-xs text-rose-300">selector: app=iris-server</span> is the same
+          label from the Deployment — that shared string is the entire wiring between the two files.
+        </p>
+        <p>
+          <span className="font-mono text-xs text-sky-300">port: 80</span> is what callers use;{' '}
+          <span className="font-mono text-xs text-sky-300">targetPort: 5000</span> is where Flask
+          listens. The Service translates between them.
+        </p>
+        <p>
+          Pods can die and be replaced with new IPs all day. The Service address never changes, because
+          it tracks labels, not addresses.
+        </p>
+        <p className="text-xs text-gray-400 italic">
+          Hover the YAML, then fire a request and watch the hop into a Pod.
+        </p>
+      </div>
+    ),
+    Visual: BlueprintServiceVisualizer,
+  },
+  {
+    id: 'ground-to-prod',
+    title: 'The Whole Build: Ground → Production',
+    subtitle: 'Six commands, and the architecture assembles itself',
+    content: (
+      <div className="space-y-3 text-gray-300 text-sm leading-relaxed pr-1">
+        <p>
+          Here is the entire lab as one continuous picture — an empty machine on the left, a live
+          inference endpoint on the right, and each command adding exactly one layer.
+        </p>
+        <ol className="list-decimal ml-5 space-y-2 text-xs">
+          <li>
+            <strong className="text-white">Bare cluster.</strong> A worker node and nothing else.
+          </li>
+          <li>
+            <strong className="text-white">docker build.</strong> Your code becomes an immutable
+            artifact. Still nothing running.
+          </li>
+          <li>
+            <strong className="text-white">apply deployment.yaml.</strong> A controller appears and
+            reconciles 0 → 2 Pods.
+          </li>
+          <li>
+            <strong className="text-white">apply service.yaml.</strong> The Pods get a front door on
+            NodePort 31234.
+          </li>
+          <li>
+            <strong className="text-white">curl /predict.</strong> Traffic flows all the way to Flask
+            and back.
+          </li>
+          <li>
+            <strong className="text-white">scale.</strong> Same loop, more replicas — this is where
+            production tuning starts.
+          </li>
+        </ol>
+        <p>
+          Beyond this lab, production swaps NodePort for a LoadBalancer or Ingress, and adds readiness
+          probes, resource limits, and image-tag rollouts. The shape you just built does not change.
+        </p>
+        <p className="text-xs text-gray-400 italic">
+          Run the commands one at a time and watch the cluster grow.
+        </p>
+      </div>
+    ),
+    Visual: GroundToProductionVisualizer,
   },
 ];
 
