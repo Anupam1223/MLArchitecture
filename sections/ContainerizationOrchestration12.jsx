@@ -171,43 +171,121 @@ const slidesData = [
   {
     id: 'instructions',
     title: 'Essential Dockerfile Instructions',
-    subtitle: 'FROM · WORKDIR / COPY · RUN · CMD',
+    subtitle: 'FROM · WORKDIR / COPY · RUN · CMD — with the why behind each',
     content: (
       <div className="space-y-3 text-gray-300 text-sm leading-relaxed pr-1">
-        <h4 className="text-white font-semibold">FROM — base image</h4>
         <p>
-          Every Dockerfile starts with <span className="font-mono text-xs text-rose-300">FROM</span>.
-          For CPU-only work, <span className="font-mono text-xs">python:3.9-slim</span> is light. For
-          GPUs prefer{' '}
-          <span className="font-mono text-xs text-rose-300">
-            nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
-          </span>
-          . Use <strong className="text-white">runtime</strong> (not devel) for most training.
-          Always pin versions — never <span className="font-mono text-xs">latest</span>.
+          These are the core instructions you will use again and again when building ML images. Each
+          one has a clear job — and a few best practices that keep builds fast and reproducible.
         </p>
-        <h4 className="text-white font-semibold">WORKDIR and COPY</h4>
+
+        <h4 className="text-white font-semibold">FROM: Selecting your base image</h4>
         <p>
-          <span className="font-mono text-xs">WORKDIR</span> sets the working directory.{' '}
-          <span className="font-mono text-xs">COPY</span> brings files in. Best practice: copy{' '}
-          <span className="font-mono text-xs">requirements.txt</span> first, install deps, then copy
-          the rest of the app — preserves layer cache when only code changes.
+          Every <span className="font-mono text-xs text-rose-300">Dockerfile</span> must start with a{' '}
+          <span className="font-mono text-xs text-rose-300">FROM</span> instruction. It names the parent
+          image you build on top of.
         </p>
-        <h4 className="text-white font-semibold">RUN — install dependencies</h4>
+        <ul className="list-disc pl-5 space-y-2">
+          <li>
+            <strong className="text-white">Standard Python image</strong> (e.g.{' '}
+            <span className="font-mono text-xs text-rose-300">python:3.9-slim</span>) — lightweight and
+            fine for CPU-only apps, but it does <em>not</em> include NVIDIA libraries for GPU work.
+          </li>
+          <li>
+            <strong className="text-white">NVIDIA CUDA image</strong> (e.g.{' '}
+            <span className="font-mono text-xs text-rose-300">
+              nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+            </span>
+            ) — recommended for GPU training. Comes pre-packaged with the CUDA toolkit and cuDNN.
+          </li>
+        </ul>
         <p>
-          Chain commands with <span className="font-mono text-xs">&&</span> in a single{' '}
-          <span className="font-mono text-xs">RUN</span> to create one layer. Use{' '}
-          <span className="font-mono text-xs">pip --no-cache-dir</span> to shrink the image.
+          Tags matter:{' '}
+          <span className="font-mono text-xs text-rose-300">runtime</span> includes libraries to run
+          pre-compiled CUDA apps (enough for most ML training).{' '}
+          <span className="font-mono text-xs text-rose-300">devel</span> adds the full SDK for compiling
+          CUDA code — heavier, usually unnecessary for training.
         </p>
-        <h4 className="text-white font-semibold">CMD</h4>
         <p>
-          Default command when the container starts. Only one{' '}
-          <span className="font-mono text-xs">CMD</span>. Prefer exec form:{' '}
-          <span className="font-mono text-xs text-rose-300">
-            CMD [&quot;python3&quot;, &quot;train.py&quot;, &quot;--epochs&quot;, &quot;10&quot;]
-          </span>
-          .
+          <strong className="text-amber-300">Reproducibility:</strong> always pin a specific version
+          tag. Never use <span className="font-mono text-xs text-rose-300">latest</span> — upstream
+          updates can silently break your environment.
         </p>
-        <p className="text-xs text-gray-400 italic">Tap FROM / WORKDIR / RUN / CMD on the right.</p>
+
+        <h4 className="text-white font-semibold">WORKDIR and COPY: Getting code into the image</h4>
+        <p>
+          <span className="font-mono text-xs text-rose-300">WORKDIR</span> sets the working directory
+          for all later instructions (
+          <span className="font-mono text-xs">RUN</span>,{' '}
+          <span className="font-mono text-xs">CMD</span>,{' '}
+          <span className="font-mono text-xs">COPY</span>, etc.). Setting it early keeps the container
+          filesystem organized.
+        </p>
+        <p>
+          <span className="font-mono text-xs text-rose-300">COPY</span> moves files and directories from
+          your machine into the image. A common pattern for fast rebuilds:
+        </p>
+        <ol className="list-decimal pl-5 space-y-1.5">
+          <li>
+            <span className="font-mono text-xs">COPY</span> only{' '}
+            <span className="font-mono text-xs text-rose-300">requirements.txt</span> first
+          </li>
+          <li>Install dependencies with <span className="font-mono text-xs">RUN</span></li>
+          <li>Then <span className="font-mono text-xs">COPY</span> the rest of the application code</li>
+        </ol>
+        <p>
+          Why? Docker caches layers. If your code changes but dependencies do not, Docker reuses the
+          cached install layer — subsequent builds are much faster.
+        </p>
+        <pre className="text-[10px] font-mono text-gray-300 bg-gray-900/80 border border-gray-700 rounded-lg p-2 overflow-x-auto">
+{`# Set the working directory
+WORKDIR /app
+
+# Copy only the requirements file first
+COPY requirements.txt .`}
+        </pre>
+
+        <h4 className="text-white font-semibold">RUN: Installing dependencies</h4>
+        <p>
+          <span className="font-mono text-xs text-rose-300">RUN</span> executes commands in a new layer
+          and commits the result. It is how you install system packages and Python libraries.
+        </p>
+        <p>
+          <strong className="text-white">Keep images small:</strong> chain commands with{' '}
+          <span className="font-mono text-xs">&&</span> and line-continuation{' '}
+          <span className="font-mono text-xs">\</span> inside a <em>single</em>{' '}
+          <span className="font-mono text-xs">RUN</span>. That creates one layer instead of many.
+        </p>
+        <p>
+          Also pass <span className="font-mono text-xs text-rose-300">--no-cache-dir</span> to pip so
+          package caches are not stored in the image.
+        </p>
+        <pre className="text-[10px] font-mono text-gray-300 bg-gray-900/80 border border-gray-700 rounded-lg p-2 overflow-x-auto">
+{`# Install system + Python packages in a single layer
+RUN apt-get update && \\
+    apt-get install -y python3-pip && \\
+    pip3 install --no-cache-dir -r requirements.txt`}
+        </pre>
+
+        <h4 className="text-white font-semibold">CMD: Defining the default command</h4>
+        <p>
+          The <span className="font-mono text-xs text-rose-300">CMD</span> instruction sets the default
+          command to run when a container starts from your image. There can be only{' '}
+          <strong className="text-white">one</strong>{' '}
+          <span className="font-mono text-xs text-rose-300">CMD</span> in a Dockerfile. For a training
+          script named <span className="font-mono text-xs text-rose-300">train.py</span>:
+        </p>
+        <pre className="text-[10px] font-mono text-gray-300 bg-gray-900/80 border border-gray-700 rounded-lg p-2 overflow-x-auto">
+          CMD [&quot;python3&quot;, &quot;train.py&quot;, &quot;--epochs&quot;, &quot;10&quot;]
+        </pre>
+        <p>
+          This is the <strong className="text-white">exec form</strong> (a JSON array). Prefer it: it
+          does not invoke a shell, which avoids awkward signal-handling issues when Docker stops the
+          container.
+        </p>
+        <p className="text-xs text-gray-400 italic">
+          Tap FROM / WORKDIR / RUN / CMD on the right — each panel mirrors these details.
+        </p>
       </div>
     ),
     Visual: DockerfileInstructionsVisualizer,

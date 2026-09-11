@@ -447,25 +447,25 @@ const INSTR = [
   {
     id: 'from',
     title: 'FROM — base image',
-    body: 'Every Dockerfile starts here. Prefer nvidia/cuda:…-runtime for GPU; python:3.9-slim for CPU-only. Pin versions — never latest.',
+    body: 'Must be first. python:3.9-slim = CPU-only (no NVIDIA libs). nvidia/cuda:…-runtime = GPU path with CUDA + cuDNN. Prefer runtime over devel for training. Always pin versions — never latest.',
     code: 'FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04',
   },
   {
     id: 'workdir',
     title: 'WORKDIR + COPY',
-    body: 'WORKDIR sets the working dir. Copy requirements.txt first, install, then copy app code — preserves layer cache.',
+    body: 'WORKDIR sets where later RUN/CMD/COPY run. Cache trick: COPY requirements.txt first → install → then COPY the rest of the app. Code changes won’t bust the dependency layer.',
     code: 'WORKDIR /app\nCOPY requirements.txt .',
   },
   {
     id: 'run',
     title: 'RUN — install deps',
-    body: 'Chain with && in one RUN to create a single layer and keep the image small. Use --no-cache-dir for pip.',
+    body: 'Each RUN adds a layer. Chain with && and \\ so apt + pip share one layer. Use pip --no-cache-dir so caches don’t bloat the image.',
     code: 'RUN apt-get update && \\\n    apt-get install -y python3-pip && \\\n    pip3 install --no-cache-dir -r requirements.txt',
   },
   {
     id: 'cmd',
     title: 'CMD — default start',
-    body: 'Only one CMD. Prefer exec form (JSON array) so signals are handled correctly — no shell wrapper.',
+    body: 'Only one CMD per Dockerfile. Exec form (JSON array) is preferred: no shell, cleaner signal handling when the container stops.',
     code: 'CMD ["python3", "train.py", "--epochs", "10"]',
   },
 ];
