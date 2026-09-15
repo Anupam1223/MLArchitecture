@@ -209,6 +209,7 @@ const slidesData = [
         </p>
         <p className="text-xs text-gray-400 italic">
           Right: run the epochs and watch the second one fall off a cliff — then oversize the dataset.
+          The second tab has the full tf.data listing, tap any line for why it sits there.
         </p>
       </div>
     ),

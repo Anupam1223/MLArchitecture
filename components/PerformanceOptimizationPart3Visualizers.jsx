@@ -833,11 +833,45 @@ const CACHE_NOTES = {
 };
 
 export function CacheVisualizer() {
+  const [tab, setTab] = useState('scene');
   const [epoch, setEpoch] = useState(1);
   const [dsGb, setDsGb] = useState(3);
+  const [focus, setFocus] = useState('cache');
   const ramGb = 16;
   const fits = dsGb <= ramGb * 0.6;
-  const epochTime = epoch === 1 || !fits ? 100 : 14;
+
+  if (tab === 'code') {
+    return (
+      <div className="flex flex-col w-full h-full p-4 overflow-hidden">
+        <div className="text-center mb-3">
+          <h3 className="text-xl font-semibold text-white mb-1">Cache the dataset in memory</h3>
+          <p className="text-gray-400 text-sm">Placement in the chain is the whole trick.</p>
+        </div>
+
+        <Tabs
+          options={[
+            { id: 'scene', label: 'Run the epochs' },
+            { id: 'code', label: 'The code' },
+          ]}
+          value={tab}
+          onChange={setTab}
+        />
+
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-3 min-h-0">
+          <CodeBlocks blocks={CACHE_BLOCKS} focus={focus} setFocus={setFocus} file="cache_pipeline.py" />
+          <div className="flex flex-col gap-2 min-h-0 overflow-auto custom-scroll">
+            <NoteBox>{CACHE_NOTES[focus]}</NoteBox>
+            <div className="rounded-xl border border-amber-400/40 bg-amber-500/10 p-3 text-xs text-gray-200 leading-relaxed">
+              <div className="text-[10px] font-bold uppercase text-amber-300 mb-1">Warning</div>
+              Be mindful of your available RAM. Attempting to cache a dataset larger than available memory
+              will cause your system to slow down dramatically or crash. Use this technique only when
+              appropriate.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full h-full p-4 overflow-y-auto custom-scroll">
@@ -845,6 +879,15 @@ export function CacheVisualizer() {
         <h3 className="text-xl font-semibold text-white mb-1">Cache the dataset in memory</h3>
         <p className="text-gray-400 text-sm">Pay the disk cost once, then never again.</p>
       </div>
+
+      <Tabs
+        options={[
+          { id: 'scene', label: 'Run the epochs' },
+          { id: 'code', label: 'The code' },
+        ]}
+        value={tab}
+        onChange={setTab}
+      />
 
       <div className="rounded-2xl border border-gray-700 bg-gray-950/70 p-4">
         <div className="flex items-center justify-center gap-3 mb-4">
