@@ -1413,10 +1413,10 @@ export function CostVisibilityVisualizer() {
   const [sel, setSel] = useState('gpu');
   const max = 4500;
   const tools = {
-    gpu: 'AWS Cost Explorer · filter EC2 / GPU · GCP Billing · Azure Cost Management',
-    s3: 'Break down by bucket and storage class — lifecycle candidates hide here',
-    cpu: 'Often right-size targets; many T3s sit underutilized',
-    xfer: 'Egress and inter-region — the silent line item',
+    gpu: 'Primary optimization target. In Cost Explorer / Cloud Billing / Cost Management, filter by GPU instance families (e.g. P4) and tags to find forgotten or oversized boxes.',
+    s3: 'Break down by bucket and storage class. Lifecycle candidates and Hot-tier waste hide here — often smaller than GPU but still worth tuning.',
+    cpu: 'Often right-size targets; many T3 (or equivalent) instances sit underutilized next to the GPU fleet.',
+    xfer: 'Egress and inter-region transfer — the silent line item. Investigate by region and usage type in the same dashboards.',
   };
 
   return (
@@ -1453,9 +1453,9 @@ export function CostVisibilityVisualizer() {
         <strong className="text-white">{BREAKDOWN.find((b) => b.id === sel).label}.</strong>{' '}
         {tools[sel]}
         {sel === 'gpu' && (
-          <span className="block mt-1 text-xs">
-            GPU compute usually dominates — make it the first optimization target. Tools: Cost Explorer /
-            CUR (AWS), Cloud Billing reports (GCP), Cost Management + Billing (Azure).
+          <span className="block mt-1 text-xs text-gray-400">
+            A typical AI project cost breakdown: GPU compute often dominates spending. Tools: AWS Cost
+            Explorer + CUR → Athena · GCP Cloud Billing reports · Azure Cost Management + Billing.
           </span>
         )}
       </NoteBox>
@@ -1534,21 +1534,25 @@ export function TaggingVisualizer() {
         {[
           ['project', 'fraud-detection-v2'],
           ['owner', 'data-science-team'],
-          ['environment', 'development'],
+          ['environment', 'production'],
           ['experiment-id', 'run-0842'],
         ].map(([k, v]) => (
           <div key={k} className="rounded-xl border border-gray-700 bg-gray-900/60 px-2 py-2">
-            <div className="text-[9px] text-cyan-400 font-mono">{k}</div>
+            <div className="text-[9px] text-rose-400 font-mono">{k}</div>
             <div className="text-[10px] text-white font-mono truncate">{v}</div>
           </div>
         ))}
       </div>
 
       <div className="rounded-xl border border-gray-700 bg-gray-900/60 p-3 mb-2 text-xs text-gray-300">
-        {step === 0 && 'Resources exist — but without tags, the bill is one opaque pile.'}
-        {step === 1 && 'Attach key-value metadata. These four tags cover most AI orgs.'}
-        {step === 2 && 'Billing systems ingest tags automatically into cost reports.'}
-        {step === 3 && 'Now you can allocate: which project spent what — and who owns it.'}
+        {step === 0 &&
+          'Resources exist — but without tags activated for cost allocation, the bill is one opaque pile.'}
+        {step === 1 &&
+          'Attach key-value metadata. Activate these tags in the billing console so they become filterable dimensions.'}
+        {step === 2 &&
+          'Tags attached to resources flow into billing reports, enabling cost allocation by project.'}
+        {step === 3 &&
+          'Now you can answer: how much did fraud-detection-v2 cost in production? What did data-science-team spend on development?'}
       </div>
 
       <Nav
@@ -1570,9 +1574,27 @@ export function BudgetAlertVisualizer() {
   const pct = Math.round((spend / budget) * 100);
 
   let alert = null;
-  if (pct >= 100) alert = { level: '100%', tone: 'rose', who: 'Eng manager + Finance', msg: 'Budget exhausted' };
-  else if (pct >= 80) alert = { level: '80%', tone: 'amber', who: 'Team lead', msg: 'Review to prevent overspend' };
-  else if (pct >= 50) alert = { level: '50%', tone: 'sky', who: 'Team Slack', msg: 'Informational checkpoint' };
+  if (pct >= 100)
+    alert = {
+      level: '100% ($10,000)',
+      tone: 'rose',
+      who: 'Eng manager + Finance',
+      msg: 'Critical — the budget has been exhausted',
+    };
+  else if (pct >= 80)
+    alert = {
+      level: '80% ($8,000)',
+      tone: 'amber',
+      who: 'Team lead (email)',
+      msg: 'Spending is on track to exceed the budget — investigate now (wrong instance type? orphaned experiment?)',
+    };
+  else if (pct >= 50)
+    alert = {
+      level: '50% ($5,000)',
+      tone: 'sky',
+      who: 'Project Slack',
+      msg: 'Informational heads-up — still room, but the meter is moving',
+    };
 
   return (
     <div className="flex flex-col w-full h-full p-4 overflow-y-auto custom-scroll">
@@ -1664,14 +1686,15 @@ export function BudgetAlertVisualizer() {
         {alert ? (
           <>
             <strong className="text-white">
-              {alert.level} alert → {alert.who}.
+              {alert.level} → {alert.who}.
             </strong>{' '}
-            {alert.msg}. Tiered thresholds let you course-correct on day 20 — not on the final invoice.
+            {alert.msg}. Finding this on day 20 is far better than finding it on the final bill.
           </>
         ) : (
           <>
-            Drag spend up. At 50% the team gets a Slack ping; at 80% the lead reviews; at 100% leadership
-            and finance are notified. Dashboards alone are passive — budgets make control active.
+            Drag spend up for the <span className="font-mono text-rose-300">project: big-llama</span>{' '}
+            $10k monthly budget. At 50% Slack gets a heads-up; at 80% the lead reviews; at 100%
+            leadership and finance are paged. Dashboards alone are passive — budgets make control active.
           </>
         )}
       </NoteBox>

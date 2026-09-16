@@ -341,24 +341,76 @@ const slidesData = [
     subtitle: 'Lifecycle · co-locate · compress',
     content: (
       <div className="space-y-3 text-gray-300 text-sm leading-relaxed pr-1">
-        <p>Be proactive instead of reacting to a surprise bill:</p>
-        <ol className="list-decimal pl-5 space-y-2 text-xs">
+        <p>
+          Being proactive is the best way to control storage and transfer expenses. Instead of reacting
+          to a high bill, implement strategies to manage data from the outset.
+        </p>
+
+        <p className="font-bold text-white">1. Use Storage Lifecycle Policies</p>
+        <p className="text-xs">
+          The most powerful tool for managing storage-at-rest costs is automation. All major cloud
+          providers offer lifecycle policies that automatically transition data between storage tiers based
+          on rules you define. For example:
+        </p>
+        <ol className="list-decimal pl-5 space-y-1 text-xs text-gray-400">
           <li>
-            <strong className="text-white">Lifecycle policies</strong> — auto-move{' '}
-            <span className="font-mono">raw-training-data</span> Hot → IA (30d) → Archive (180d) → delete
-            (3y).
+            All new data in the{' '}
+            <span className="font-mono text-rose-300">raw-training-data</span> bucket starts in the{' '}
+            <strong className="text-white">Standard</strong> tier.
           </li>
           <li>
-            <strong className="text-white">Same region for compute and data</strong> — zero internal
-            transfer cost; use a CDN for global static assets.
+            After <strong className="text-white">30 days</strong> of inactivity →{' '}
+            <strong className="text-white">Infrequent Access</strong>.
           </li>
           <li>
-            <strong className="text-white">Compress and use columnar formats</strong> — Gzip/Zstd before
-            upload; Parquet/Arrow so queries scan only needed columns.
+            After <strong className="text-white">180 days</strong> →{' '}
+            <strong className="text-white">Archive</strong>.
+          </li>
+          <li>
+            After <strong className="text-white">3 years</strong> → permanently delete.
           </li>
         </ol>
+        <p className="text-xs">
+          This &quot;set it and forget it&quot; approach keeps data in the most cost-effective tier for its
+          age and access pattern, with no manual intervention.
+        </p>
+
+        <p className="font-bold text-white">2. Keep Compute and Data in the Same Region</p>
+        <p className="text-xs">
+          To avoid inter-region transfer fees, provision compute (GPU VMs) in the same geographic region
+          as your object storage bucket. This is a primary architectural principle for cloud-based AI. If
+          data is in <span className="font-mono text-rose-300">us-east-1</span>, the training cluster
+          should also be in <span className="font-mono text-rose-300">us-east-1</span> — higher bandwidth,
+          zero cost for that internal traffic.
+        </p>
+        <p className="text-xs">
+          For globally distributed inference, use a <strong className="text-white">CDN</strong> to cache
+          static assets or common API responses at edge locations closer to users. That cuts latency and
+          often provides a cheaper transfer rate than direct egress from your primary region.
+        </p>
+
+        <p className="font-bold text-white">3. Compress Data and Use Efficient Formats</p>
+        <p className="text-xs">
+          Storage and transfer costs are based on size — make the data smaller. Before uploading, compress
+          large files (text corpora, logs, JSON) with <strong className="text-white">Gzip</strong> or{' '}
+          <strong className="text-white">Zstandard</strong>; the CPU cost of compress/decompress is usually
+          paid back many times over in storage savings.
+        </p>
+        <p className="text-xs">
+          For tabular data, prefer columnar formats like{' '}
+          <strong className="text-white">Apache Parquet</strong> or{' '}
+          <strong className="text-white">Apache Arrow</strong> over CSV/JSON. They compress better and let
+          query engines read only the columns needed — drastically less data scanned and retrieved, which
+          also lowers access costs.
+        </p>
+
+        <p>
+          By treating data storage and transfer as a primary component of your infrastructure cost model,
+          you can build systems that are performant and economically viable at scale.
+        </p>
         <p className="text-xs text-gray-400 italic">
-          Right: three tabs — age a dataset, flip regions, compare CSV vs Parquet scans.
+          Right: three tabs — age a dataset through lifecycle, flip same vs split region, compare CSV vs
+          Parquet scans.
         </p>
       </div>
     ),
@@ -371,28 +423,53 @@ const slidesData = [
     content: (
       <div className="space-y-3 text-gray-300 text-sm leading-relaxed pr-1">
         <p>
-          A forgotten GPU can empty a project budget. The goal is to leave reactive “bill shock” for a
-          proactive, data-driven governance loop: see where money goes, attribute it, and get notified
-          before it spirals.
+          You cannot manage what you do not measure. This principle is especially true for AI
+          infrastructure, where the cost of a single, forgotten GPU instance can quietly erase a
+          project&apos;s budget over a weekend. While designing cost-effective systems is important,
+          maintaining them requires operational discipline to keep costs in check. The goal is to move
+          from a reactive &quot;bill shock&quot; scenario to a proactive, data-driven financial governance
+          model.
         </p>
-        <p className="font-bold text-white">Visibility tools</p>
-        <ul className="list-disc pl-5 space-y-1.5 text-xs">
+        <p>
+          This involves establishing a feedback loop where you can see where every dollar is going,
+          attribute spending to specific activities, and automatically get notified before costs go off
+          track.
+        </p>
+
+        <p className="font-bold text-white">Gaining Visibility with Cost Analysis Tools</p>
+        <p className="text-xs">
+          The first step in managing costs is achieving clear visibility. All major cloud providers offer
+          powerful, built-in tools that transform raw billing data into understandable insights. These
+          dashboards are your primary lens for viewing and dissecting infrastructure spend.
+        </p>
+        <ul className="list-disc pl-5 space-y-2.5 text-xs">
           <li>
-            <strong className="text-white">AWS</strong> — Cost Explorer; CUR for hourly Athena queries
+            <strong className="text-white">AWS:</strong>{' '}
+            <strong className="text-cyan-300">Cost Explorer</strong> is the main tool for visualizing
+            spending patterns. Filter and group by service (Amazon EC2, S3), usage type, region, and —
+            most importantly — resource tags. For deeper analysis, the{' '}
+            <strong className="text-cyan-300">AWS Cost and Usage Report (CUR)</strong> provides granular,
+            hourly data you can ingest into a warehouse like Amazon Athena for complex queries.
           </li>
           <li>
-            <strong className="text-white">GCP</strong> — Cloud Billing reports by project / product /
-            labels
+            <strong className="text-white">GCP:</strong>{' '}
+            <strong className="text-cyan-300">Cloud Billing reports</strong> provide an interactive
+            dashboard similar to Cost Explorer. Explore costs over time, grouped by project, product (e.g.
+            Compute Engine, Cloud Storage), and labels (GCP&apos;s term for tags).
           </li>
           <li>
-            <strong className="text-white">Azure</strong> — Cost Management + Billing
+            <strong className="text-white">Azure:</strong>{' '}
+            <strong className="text-cyan-300">Cost Management + Billing</strong> is a suite for analyzing
+            costs. Create custom views, group by resource tags, and track spending against budgets.
           </li>
         </ul>
-        <p>
-          GPU compute usually dominates the breakdown — make it the primary optimization target.
+        <p className="text-xs">
+          These tools are most effective when you investigate costs from multiple angles. For a typical AI
+          workload, start with a high-level service breakdown to identify the main cost drivers — GPU
+          compute often dominates, making it the primary optimization target.
         </p>
         <p className="text-xs text-gray-400 italic">
-          Right: tap bars on a typical AI cost breakdown.
+          Right: tap bars on a typical AI cost breakdown to see where the money goes.
         </p>
       </div>
     ),
@@ -405,27 +482,57 @@ const slidesData = [
     content: (
       <div className="space-y-3 text-gray-300 text-sm leading-relaxed pr-1">
         <p>
-          Visibility shows <em>what</em> is expensive. Accountability shows <em>who</em> or{' '}
-          <em>which project</em> is responsible. Tags are key-value metadata on VMs, buckets and databases.
+          Visibility tells you <em>what</em> is costing money; accountability tells you <em>who</em> or{' '}
+          <em>which project</em> is responsible for that cost. In a shared environment with multiple teams
+          and experiments, proper resource tagging is the foundation of financial accountability.
         </p>
-        <p>Essential tags for an AI org:</p>
-        <ul className="list-disc pl-5 space-y-1.5 text-xs font-mono">
+        <p>
+          Tags are simple key-value pairs of metadata that you attach to your cloud resources — virtual
+          machines, storage buckets, databases, and more. When you activate these tags for cost allocation
+          in your cloud provider&apos;s billing console, they appear as filterable dimensions in your cost
+          reports. That lets you pivot the entire cost analysis around your own business logic.
+        </p>
+        <p className="font-bold text-white">
+          A consistent tagging strategy is essential. For an AI/ML organization, a good starting point
+          includes:
+        </p>
+        <ul className="list-disc pl-5 space-y-2.5 text-xs">
           <li>
-            <span className="text-cyan-300">project</span>: fraud-detection-v2
+            <span className="font-mono text-rose-300">project</span>: The name of the model or initiative
+            (e.g. <span className="font-mono text-rose-300">fraud-detection-v2</span>).
           </li>
           <li>
-            <span className="text-cyan-300">owner</span>: data-science-team
+            <span className="font-mono text-rose-300">owner</span>: The user or team responsible for the
+            resource (e.g. <span className="font-mono text-rose-300">data-science-team</span> or{' '}
+            <span className="font-mono text-rose-300">jane.doe</span>).
           </li>
           <li>
-            <span className="text-cyan-300">environment</span>: development | staging | production
+            <span className="font-mono text-rose-300">environment</span>: The stage of the workload (e.g.{' '}
+            <span className="font-mono text-rose-300">development</span>,{' '}
+            <span className="font-mono text-rose-300">staging</span>,{' '}
+            <span className="font-mono text-rose-300">production</span>).
           </li>
           <li>
-            <span className="text-cyan-300">experiment-id</span>: run-0842
+            <span className="font-mono text-rose-300">experiment-id</span>: A unique identifier for a
+            specific training run — useful for tracking the cost of individual experiments.
           </li>
         </ul>
-        <p>Tags flow into billing reports so you can allocate cost by project.</p>
+        <p>
+          With this strategy you can precisely answer questions like:{' '}
+          <em>
+            &quot;How much did the{' '}
+            <span className="font-mono text-rose-300">fraud-detection-v2</span> project cost in production
+            last month?&quot;
+          </em>{' '}
+          or{' '}
+          <em>
+            &quot;What was the total spend by the{' '}
+            <span className="font-mono text-rose-300">data-science-team</span> on development
+            resources?&quot;
+          </em>
+        </p>
         <p className="text-xs text-gray-400 italic">
-          Right: step resources → tags → billing report → allocated costs.
+          Right: step resources → tags → billing report → cost allocation by project.
         </p>
       </div>
     ),
@@ -438,30 +545,66 @@ const slidesData = [
     content: (
       <div className="space-y-3 text-gray-300 text-sm leading-relaxed pr-1">
         <p>
-          A <strong className="text-white">budget</strong> is a financial threshold for a scope (whole
-          account, or tagged resources like{' '}
-          <span className="font-mono text-cyan-300">project: big-llama</span>). An{' '}
-          <strong className="text-white">alert</strong> fires when actual or forecasted spend crosses a
-          percentage of that budget.
+          Monitoring dashboards is a passive activity. To establish active control, you must define
+          financial guardrails using budgets and alerts. This mechanism automatically notifies you when
+          spending is about to go off-plan, giving you time to act before a minor overspend becomes a major
+          problem.
         </p>
-        <p>Example — $10,000 / month experiment:</p>
-        <ul className="list-disc pl-5 space-y-1.5 text-xs">
+        <ul className="list-disc pl-5 space-y-2 text-xs">
           <li>
-            <strong className="text-sky-300">50%</strong> — Slack to the team (informational)
+            A <strong className="text-white">budget</strong> is a financial threshold you set for a
+            specific scope. That scope can be broad (e.g. your entire account&apos;s monthly spending) or
+            narrow (e.g. the monthly cost for all resources tagged{' '}
+            <span className="font-mono text-rose-300">project: fraud-detection-v2</span>).
           </li>
           <li>
-            <strong className="text-amber-300">80%</strong> — email the team lead to review
-          </li>
-          <li>
-            <strong className="text-rose-300">100%</strong> — eng manager + finance (budget exhausted)
+            An <strong className="text-white">alert</strong> is a notification triggered when your actual
+            or forecasted spending crosses a certain percentage of your budget.
           </li>
         </ul>
-        <p>
-          Tiered alerts let you course-correct mid-cycle instead of discovering overruns on the final
-          invoice.
+
+        <p className="font-bold text-white">
+          Practical scenario — $10,000 monthly budget for a language model experiment:
+        </p>
+        <ol className="list-decimal pl-5 space-y-2.5 text-xs">
+          <li>
+            <strong className="text-white">Define the Scope:</strong> the budget applies to all resources
+            tagged with <span className="font-mono text-rose-300">project: big-llama</span>.
+          </li>
+          <li>
+            <strong className="text-white">Set the Budget:</strong> in the cloud billing console (e.g. AWS
+            Budgets, Azure Cost Management), create a budget with period &quot;Monthly&quot; and amount
+            $10,000. Apply a filter so it only tracks costs from resources with the{' '}
+            <span className="font-mono text-rose-300">project: big-llama</span> tag.
+          </li>
+          <li>
+            <strong className="text-white">Configure Alert Thresholds</strong> — an early-warning ladder:
+            <ul className="list-disc pl-4 mt-1.5 space-y-1.5 text-gray-400">
+              <li>
+                <strong className="text-sky-300">At 50% ($5,000):</strong> notify the project&apos;s
+                internal Slack channel — an informational &quot;heads-up.&quot;
+              </li>
+              <li>
+                <strong className="text-amber-300">At 80% ($8,000):</strong> email the team lead — spending
+                is on track to exceed the budget and warrants a review.
+              </li>
+              <li>
+                <strong className="text-rose-300">At 100% ($10,000):</strong> high-priority email to the
+                engineering manager and finance — the budget has been exhausted.
+              </li>
+            </ul>
+          </li>
+        </ol>
+        <p className="text-xs">
+          This tiered system prevents surprises and allows course correction. When the 80% alert fires, the
+          team lead can investigate — maybe a training job used an oversized instance, or an old
+          experiment&apos;s resources were never terminated. Finding that on{' '}
+          <strong className="text-white">day 20</strong> of the month is far better than finding it on the
+          final bill.
         </p>
         <p className="text-xs text-gray-400 italic">
-          Right: drag spend across the $10k budget and watch each alert tier light up.
+          Right: drag spend across the $10k budget and watch each alert tier light up — then see the
+          deploy → monitor → alert → optimize loop.
         </p>
       </div>
     ),
